@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Collections ---
+
+    match /interviews/{interviewId} {
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid
+        && isValidInterview(request.resource.data);
+      
+      allow read, list: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+      
+      // Interviews are immutable once saved
+      allow update, delete: if false;
+    }
+
+    match /recommendations/{recommendationId} {
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+      
+      allow read, list: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+      
+      allow update, delete: if false;
+    }
+
+    function isValidInterview(data) {
+      return data.keys().hasAll(['userId', 'role', 'timestamp', 'answers', 'feedback'])
+        && data.userId is string
+        && data.role is string
+        && data.role.size() <= 200
+        && data.timestamp is timestamp
+        && data.answers is list
+        && data.feedback is map;
+    }
+  }
+}

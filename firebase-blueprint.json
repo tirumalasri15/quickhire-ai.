@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "InterviewSession": {
+      "title": "Interview Session",
+      "description": "Records of a completed mock interview session",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "role": { "type": "string" },
+        "company": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "questionId": { "type": "string" },
+              "questionText": { "type": "string" },
+              "answerText": { "type": "string" }
+            }
+          }
+        },
+        "feedback": {
+          "type": "object",
+          "properties": {
+            "overallScore": { "type": "number" },
+            "strengths": { "type": "array", "items": { "type": "string" } },
+            "weaknesses": { "type": "array", "items": { "type": "string" } },
+            "proTips": { "type": "array", "items": { "type": "string" } },
+            "improvementActions": { "type": "array", "items": { "type": "string" } },
+            "bestAnswer": {
+              "type": "object",
+              "properties": {
+                "quote": { "type": "string" },
+                "reason": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "required": ["userId", "role", "timestamp", "answers", "feedback"]
+    },
+    "JobRecommendation": {
+      "title": "Job Recommendation",
+      "description": "AI-generated job recommendations based on interview performance",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "role": { "type": "string" },
+        "company": { "type": "string" },
+        "alignmentScore": { "type": "number" },
+        "reasoning": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "role", "company", "alignmentScore", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/interviews/{interviewId}": {
+      "schema": "InterviewSession",
+      "description": "Historical mock interview sessions"
+    },
+    "/recommendations/{recommendationId}": {
+      "schema": "JobRecommendation",
+      "description": "Personalized job recommendations"
+    }
+  }
+}
